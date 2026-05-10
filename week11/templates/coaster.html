@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ coaster.name }} - Coaster Tracker{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+<div class="coaster-grid" style="grid-template-columns: 1fr;">
+    <div class="coaster-card" style="padding: 3rem;">
+        <header class="page-header" style="margin-bottom: 2rem;">
+            <h1 style="font-size: 3rem; margin-bottom: 0.25rem;">{{ coaster.name }}</h1>
+            <p style="font-size: 1.3rem; color: var(--accent-2); font-weight: 600;">{{ coaster.park_name }}</p>
+        </header>
+
+        <div class="star-rating" style="justify-content: center; margin-bottom: 2rem;">
+            {% for i in range(10) %}
+            <svg class="star {% if i < coaster.rating %}filled{% endif %}" style="width: 28px; height: 28px;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            {% endfor %}
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: center; margin-bottom: 3rem;">
+            <div class="stat-card" style="flex: 1; min-width: 200px;">
+                <div class="stat-icon">⭐</div>
+                <div class="stat-info">
+                    <span class="stat-value">{{ coaster.rating }}<small>/10</small></span>
+                    <span class="stat-label">Your Rating</span>
+                </div>
+            </div>
+            <div class="stat-card" style="flex: 1; min-width: 200px;">
+                <div class="stat-icon">🏔️</div>
+                <div class="stat-info">
+                    <span class="stat-value">{{ coaster.height }}<small>m</small></span>
+                    <span class="stat-label">Height</span>
+                </div>
+            </div>
+        </div>
+
+        <h3 style="margin-bottom: 1rem; color: var(--text-primary); font-size: 1.3rem; font-weight: 700;">📍 Park Location</h3>
+        <div id="map" style="height: 400px; width: 100%; border-radius: var(--radius-md); border: 1px solid var(--border-color); overflow: hidden; margin-bottom: 2rem; z-index: 10;"></div>
+        
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <a href="{{ url_for('edit', id=coaster.id) }}" class="btn btn-primary">Edit Coaster</a>
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">Back to Tracker</a>
+        </div>
+    </div>
+</div>
+
+<style>
+.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+    background: var(--card-bg) !important;
+    color: var(--text-primary) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-color);
+}
+.leaflet-container a { color: var(--accent-1); }
+.leaflet-container a.leaflet-popup-close-button { color: var(--text-secondary); }
+</style>
+
+<script>
+    var lat = {{ coaster.latitude if coaster.latitude else 0 }};
+    var lon = {{ coaster.longitude if coaster.longitude else 0 }};
+    var parkName = "{{ coaster.park_name }}";
+    
+    if (lat !== 0 && lon !== 0) {
+        var map = L.map('map').setView([lat, lon], 14);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        }).addTo(map);
+        L.marker([lat, lon]).addTo(map)
+            .bindPopup('<b>' + parkName + '</b>')
+            .openPopup();
+    } else {
+        document.getElementById('map').innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:rgba(10,14,26,0.8);color:var(--text-secondary);"><div style="font-size:3rem;margin-bottom:1rem;">🗺️</div><p style="font-size:1.1rem;">Location not configured for this park.</p><p style="margin-top:0.5rem;">Go to <a href="{{ url_for("parks") }}" style="color:var(--accent-1);">Parks</a> to add GPS coordinates.</p></div>';
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Coaster Tracker{% endblock %}</title>
+    <meta name="description" content="Track and rate your favorite rollercoasters from around the world.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-content">
+            <a href="{{ url_for('index') }}" class="logo">🎢 CoasterTracker</a>
+            <div class="nav-links">
+                <a href="{{ url_for('index') }}">My Coasters</a>
+                <a href="{{ url_for('parks') }}">Parks</a>
+                <a href="{{ url_for('global_map') }}">Map View</a>
+                <a href="{{ url_for('add') }}" class="btn btn-primary">+ Add New</a>
+            </div>
+        </div>
+    </nav>
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+    <footer class="site-footer">
+        <p>Built with 🎢 by <span>CoasterTracker</span></p>
+    </footer>
+    <script>
+        // Card mouse-follow glow effect
+        document.querySelectorAll('.coaster-card').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                const x = ((e.clientX - rect.left) / rect.width) * 100;
+                const y = ((e.clientY - rect.top) / rect.height) * 100;
+                card.style.setProperty('--mouse-x', x + '%');
+                card.style.setProperty('--mouse-y', y + '%');
+            });
+        });
+    </script>
+</body>
+</html>

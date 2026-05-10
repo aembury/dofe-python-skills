@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Park - Coaster Tracker{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <header class="page-header">
+        <h1>Add a Theme Park</h1>
+        <p>Log a new theme park and its geographical location.</p>
+    </header>
+
+    <form method="POST" class="coaster-form">
+        <div class="form-group">
+            <label for="name">Park Name</label>
+            <input type="text" id="name" name="name" required placeholder="e.g. Cedar Point">
+        </div>
+        <div class="form-group">
+            <label for="latitude">Latitude (optional)</label>
+            <input type="number" id="latitude" name="latitude" step="0.000001" placeholder="e.g. 41.4822">
+            <small style="color: var(--text-secondary); margin-top: 0.25rem; display: block;">You can find this on Google Maps by right-clicking a location.</small>
+        </div>
+        <div class="form-group">
+            <label for="longitude">Longitude (optional)</label>
+            <input type="number" id="longitude" name="longitude" step="0.000001" placeholder="e.g. -82.6835">
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Add Park</button>
+        <a href="{{ url_for('parks') }}" class="btn btn-secondary btn-block text-center" style="margin-top: 1rem;">Cancel</a>
+    </form>
+</div>
+{% endblock %}

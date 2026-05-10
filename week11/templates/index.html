@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}My Coasters - Coaster Tracker{% endblock %}
+
+{% block content %}
+<header class="page-header">
+    <h1>My Rollercoasters</h1>
+    <p>A collection of the thrilling rides you've conquered.</p>
+</header>
+
+{% if stats and stats.total_coasters > 0 %}
+<div class="stats-dashboard">
+    <div class="stat-card">
+        <div class="stat-icon">🎢</div>
+        <div class="stat-info">
+            <span class="stat-value">{{ stats.total_coasters }}</span>
+            <span class="stat-label">Total Coasters</span>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">⭐</div>
+        <div class="stat-info">
+            <span class="stat-value">{{ stats.avg_rating or '0' }}<small>/10</small></span>
+            <span class="stat-label">Avg Rating</span>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">🏔️</div>
+        <div class="stat-info">
+            <span class="stat-value">{{ stats.tallest_height or '0' }}<small>m</small></span>
+            <span class="stat-label">Tallest</span>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">🎡</div>
+        <div class="stat-info">
+            <span class="stat-value">{{ stats.unique_parks }}</span>
+            <span class="stat-label">Unique Parks</span>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="coaster-grid">
+    {% for coaster in rollercoasters %}
+    <div class="coaster-card">
+        <div class="card-actions">
+            <a href="{{ url_for('coaster', id=coaster.id) }}" class="action-btn view-btn" title="View Details">🗺️</a>
+            <a href="{{ url_for('edit', id=coaster.id) }}" class="action-btn edit-btn" title="Edit">✏️</a>
+            <form action="{{ url_for('delete', id=coaster.id) }}" method="POST" class="delete-form" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this coaster?');">
+                <button type="submit" class="action-btn delete-btn" title="Delete">🗑️</button>
+            </form>
+        </div>
+        <div class="coaster-rating">
+            <span class="rating-value">{{ coaster.rating }}</span><span class="rating-max">/10</span>
+        </div>
+        <div class="star-rating">
+            {% for i in range(10) %}
+            <svg class="star {% if i < coaster.rating %}filled{% endif %}" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            {% endfor %}
+        </div>
+        <div class="coaster-info">
+            <h2><a href="{{ url_for('coaster', id=coaster.id) }}">{{ coaster.name }}</a></h2>
+            <p class="park-name"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> {{ coaster.park_name }}</p>
+            <p class="coaster-height"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg> {{ coaster.height }}m tall</p>
+        </div>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">🎢</div>
+        <h2>No rollercoasters yet</h2>
+        <p>You haven't added any rollercoasters to your tracker. Time to ride!</p>
+        <a href="{{ url_for('add') }}" class="btn btn-primary">Add Your First Coaster</a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

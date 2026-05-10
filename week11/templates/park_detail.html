@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ park.name }} - Coaster Tracker{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+<header class="page-header">
+    <h1>{{ park.name }}</h1>
+    <p>
+        {% if park.latitude and park.longitude and park.latitude != 0 and park.longitude != 0 %}
+            📍 {{ park.latitude|round(4) }}°, {{ park.longitude|round(4) }}°
+        {% else %}
+            📍 Location not set
+        {% endif %}
+    </p>
+</header>
+
+{% if stats and stats.total > 0 %}
+<div class="stats-dashboard">
+    <div class="stat-card">
+        <div class="stat-icon">🎢</div>
+        <div class="stat-info">
+            <span class="stat-value">{{ stats.total }}</span>
+            <span class="stat-label">Coasters Ridden</span>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">⭐</div>
+        <div class="stat-info">
+            <span class="stat-value">{{ stats.avg_rating or '0' }}<small>/10</small></span>
+            <span class="stat-label">Avg Rating</span>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">🏔️</div>
+        <div class="stat-info">
+            <span class="stat-value">{{ stats.tallest or '0' }}<small>m</small></span>
+            <span class="stat-label">Tallest Here</span>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Map -->
+{% if park.latitude and park.longitude and park.latitude != 0 and park.longitude != 0 %}
+<div class="coaster-card" style="padding: 1.5rem; margin-bottom: 2rem;">
+    <h3 style="margin-bottom: 1rem; font-weight: 700; font-size: 1.2rem;">📍 Park Location</h3>
+    <div id="park-map" style="height: 300px; width: 100%; border-radius: var(--radius-md); border: 1px solid var(--border-color); overflow: hidden; z-index: 10;"></div>
+</div>
+{% endif %}
+
+<!-- Coasters at this park -->
+<h3 style="margin-bottom: 1.25rem; font-weight: 700; font-size: 1.3rem;">🎢 Coasters You've Ridden Here</h3>
+
+<div class="coaster-grid">
+    {% for coaster in coasters %}
+    <div class="coaster-card">
+        <div class="card-actions">
+            <a href="{{ url_for('coaster', id=coaster.id) }}" class="action-btn view-btn" title="View Details">🗺️</a>
+            <a href="{{ url_for('edit', id=coaster.id) }}" class="action-btn edit-btn" title="Edit">✏️</a>
+        </div>
+        <div class="coaster-rating">
+            <span class="rating-value">{{ coaster.rating }}</span><span class="rating-max">/10</span>
+        </div>
+        <div class="star-rating">
+            {% for i in range(10) %}
+            <svg class="star {% if i < coaster.rating %}filled{% endif %}" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            {% endfor %}
+        </div>
+        <div class="coaster-info">
+            <h2><a href="{{ url_for('coaster', id=coaster.id) }}">{{ coaster.name }}</a></h2>
+            <p class="coaster-height"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg> {{ coaster.height }}m tall</p>
+        </div>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">🎢</div>
+        <h2>No coasters logged here yet</h2>
+        <p>You haven't added any rollercoasters at this park.</p>
+        <a href="{{ url_for('add') }}" class="btn btn-primary">Add a Coaster</a>
+    </div>
+    {% endfor %}
+</div>
+
+<div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2.5rem; flex-wrap: wrap;">
+    <a href="{{ url_for('park_edit', id=park.id) }}" class="btn btn-primary">Edit Park</a>
+    <a href="{{ url_for('parks') }}" class="btn btn-secondary">Back to Parks</a>
+</div>
+
+<style>
+.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+    background: var(--card-bg) !important;
+    color: var(--text-primary) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-color);
+}
+.leaflet-container a { color: var(--accent-1); }
+.leaflet-container a.leaflet-popup-close-button { color: var(--text-secondary); }
+</style>
+
+{% if park.latitude and park.longitude and park.latitude != 0 and park.longitude != 0 %}
+<script>
+    var lat = {{ park.latitude }};
+    var lon = {{ park.longitude }};
+    var map = L.map('park-map').setView([lat, lon], 14);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+    }).addTo(map);
+    L.marker([lat, lon]).addTo(map)
+        .bindPopup('<b>{{ park.name }}</b>')
+        .openPopup();
+</script>
+{% endif %}
+{% endblock %}

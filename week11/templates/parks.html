@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Parks - Coaster Tracker{% endblock %}
+
+{% block content %}
+<header class="page-header">
+    <h1>Theme Parks</h1>
+    <p>Manage the locations where your coasters live.</p>
+    <a href="{{ url_for('park_add') }}" class="btn btn-primary" style="margin-top: 1.5rem;">+ Add New Park</a>
+</header>
+
+<div class="coaster-grid">
+    {% for park in parks %}
+    <div class="coaster-card">
+        <div class="card-actions">
+            <a href="{{ url_for('park_edit', id=park.id) }}" class="action-btn edit-btn" title="Edit">✏️</a>
+            <form action="{{ url_for('park_delete', id=park.id) }}" method="POST" class="delete-form" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this park? Parks with coasters cannot be deleted.');">
+                <button type="submit" class="action-btn delete-btn" title="Delete">🗑️</button>
+            </form>
+        </div>
+        <div class="coaster-info" style="margin-top: 0.5rem;">
+            <h2 style="margin-bottom: 0.5rem;"><a href="{{ url_for('park_detail', id=park.id) }}" style="color: inherit; text-decoration: none;">{{ park.name }}</a></h2>
+            <p class="park-name" style="margin-bottom: 0;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> 
+                {% if park.latitude and park.longitude and park.latitude != 0 and park.longitude != 0 %}
+                    {{ park.latitude|round(4) }}°, {{ park.longitude|round(4) }}°
+                {% else %}
+                    <span style="opacity: 0.5;">Location not set</span>
+                {% endif %}
+            </p>
+        </div>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">🎡</div>
+        <h2>No parks yet</h2>
+        <p>Add some theme parks so you can associate your rollercoasters with them.</p>
+        <a href="{{ url_for('park_add') }}" class="btn btn-primary">Add Your First Park</a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

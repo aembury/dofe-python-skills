@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Global Map - Coaster Tracker{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+<header class="page-header">
+    <h1>Global Coaster Map</h1>
+    <p>Every park you've visited across the globe.</p>
+</header>
+
+<div class="coaster-card" style="padding: 1.5rem;">
+    <div id="global-map" style="height: 600px; width: 100%; border-radius: var(--radius-md); border: 1px solid var(--border-color); overflow: hidden; z-index: 10;"></div>
+</div>
+
+<style>
+.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+    background: var(--card-bg) !important;
+    color: var(--text-primary) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-color);
+}
+.leaflet-container a { color: var(--accent-1); }
+.leaflet-container a.leaflet-popup-close-button { color: var(--text-secondary); }
+.leaflet-popup-content b { font-weight: 700; }
+.leaflet-popup-content { font-family: 'Outfit', sans-serif; font-size: 0.95rem; }
+</style>
+
+<script>
+    var parksData = {{ parks_json | safe }};
+    var map = L.map('global-map').setView([20, 0], 2);
+    
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        minZoom: 2
+    }).addTo(map);
+    
+    if (parksData && parksData.length > 0) {
+        var markers = [];
+        parksData.forEach(function(park) {
+            var marker = L.marker([park.lat, park.lon])
+                .bindPopup('<b>' + park.name + '</b><br>🎢 ' + park.count + ' coaster' + (park.count !== 1 ? 's' : '') + ' ridden');
+            marker.addTo(map);
+            markers.push(marker);
+        });
+        
+        if (markers.length > 1) {
+            var group = new L.featureGroup(markers);
+            map.fitBounds(group.getBounds().pad(0.15));
+        } else if (markers.length === 1) {
+            map.setView([parksData[0].lat, parksData[0].lon], 5);
+        }
+    }
+</script>
+{% endblock %}
