@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - My Flask App{% endblock %}
+
+{% block content %}
+    <div class="hero">
+        <img src="{{ url_for('static', filename='profile.png') }}" alt="Profile Image" class="profile-image">
+        <h1>Welcome to Olivia's first website built using AI</h1>
+        <p>Feel free to look around and explore the different pages using the menu bar above!</p>
+    </div>
+{% endblock %}
